@@ -22,8 +22,9 @@ class Board:
             self.piecesInBoard = set()
             for j, cell in enumerate(col):
                 piece = self._get_piece_from_string(cell)
-                piece.row = i
-                piece.column = j
+                if piece is not None:
+                    piece.row = i
+                    piece.column = j
                 self.piecesInBoard.add(piece.__class__)
                 if isinstance(piece, King):
                     setattr(self, cell, piece)
