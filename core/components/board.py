@@ -26,7 +26,7 @@ class Board:
                 piece.column = j
                 self.piecesInBoard.add(piece.__class__)
                 if isinstance(piece, King):
-                    setattr(self, cell)
+                    setattr(self, cell, piece)
                 colVal += (piece, )
             self.state += (colVal, )
 
@@ -68,14 +68,22 @@ class Board:
         print(string)
 
     def is_white_in_check(self):
-        return True if self._is_hunter_watching(self.kl) else return False
+        return True if self._is_hunter_watching(self.kl) else False
 
-    def _get_possible_moves(self, piece):
-        if isinstance(piece, Knight):
-            rows = 
+    # def _get_possible_moves(self, piece):
+    #     if isinstance(piece, Knight):
+    #         rows = 
 
     def _is_hunter_watching(self, piece):
-        possibleKillZones = _get_killzones(piece)
+        possibleKillZones = self._get_killzones(piece)
+
+        hunters = ()
+        # TODO trivial solution. Make better
+        for kz in possibleKillZones:
+            if self.state[kz[0]][kz[1]] is not None:
+                hunters += (self.state[kz[0]][kz[1]], )
+
+        return hunters or False
 
     def _get_killzones(self, piece):
         killzones = set()
@@ -91,7 +99,7 @@ class Board:
                     (piece.row-1, piece.column+2),
                     (piece.row-1, piece.column-2),
                 ))
-            if isinstance(k, King):
+            if isinstance(p, King):
                 killzones.update((
                     (piece.row-1, piece.column-1),
                     (piece.row-1, piece.column),
@@ -106,4 +114,9 @@ class Board:
                     (piece.row+1, piece.column+1),
                 ))
 
-            for i in killzones
+        return killzones
+
+            # TODO do elimation of non pssible squares
+            # for i in killzones:
+            #     for j in i:
+            #         if 
