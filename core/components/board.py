@@ -5,7 +5,7 @@ from .pieces import Knight, King
 
 
 class Board:
-    
+
     def __init__(self):
         self._construct_board()
 
@@ -87,10 +87,10 @@ class Board:
         return hunters or False
 
     def _get_killzones(self, piece):
-        killzones = set()
+        killzones = ()
         for p in self.piecesInBoard:
-            if isinstance(p, Knight):
-                killzones.update((
+            if p is Knight:
+                killzones += (
                     (piece.row+2, piece.column+1),
                     (piece.row+2, piece.column-1),
                     (piece.row-2, piece.column+1),
@@ -99,10 +99,9 @@ class Board:
                     (piece.row+1, piece.column-2),
                     (piece.row-1, piece.column+2),
                     (piece.row-1, piece.column-2),
-                ))
-            print(killzones)
-            if isinstance(p, King):
-                killzones.update((
+                )
+            if p is King:
+                killzones += (
                     (piece.row-1, piece.column-1),
                     (piece.row-1, piece.column),
                     (piece.row-1, piece.column+1),
@@ -114,8 +113,7 @@ class Board:
                     (piece.row+1, piece.column-1),
                     (piece.row+1, piece.column),
                     (piece.row+1, piece.column+1),
-                ))
-        # print(killzones)
+                )
         return killzones
 
             # TODO do elimation of non pssible squares
