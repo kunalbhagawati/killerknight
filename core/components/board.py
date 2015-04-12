@@ -41,26 +41,19 @@ class Board:
             team = string[1]
             return peiceTypes[string[0]](team)
 
-    def _get_state(self, asString=0):
-        if not asString:
-            return self.state
-        else:
-            string = ''
-            for row in self.state:
-                string += "|"
-                for cell in row:
-                    if cell is None:
-                        string += '  '
-                    else:
-                        # TODO do below by dict
-                        if isinstance(cell, King):
-                            string += 'k'
-                        elif isinstance(cell, Knight):
-                            string += 'n'
-                        string += cell.team
-                    string += "|"
-                string += "\n"
-            return string
+    def _get_state(self):
+        return self.state
 
-    def _print_broard(self):
-        print(self._get_state(asString=1))
+    def print_broard(self):
+        string = ''
+        for row in self.state:
+            string += "|"
+            for cell in row:
+                if cell is None:
+                    string += '  '
+                else:
+                    # TODO do below by dict
+                    string += str(cell)
+                string += "|"
+            string += "\n"
+        print(string)
