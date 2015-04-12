@@ -14,18 +14,18 @@ class Board:
         readRows = readData.split("\n")
 
         self.state = ()
+        self.piecesInBoard = set()
         for i, col in enumerate(readRows):
             col = col.split("|")
             col.pop(0)
             col.pop(len(col)-1)
             colVal = ()
-            self.piecesInBoard = set()
             for j, cell in enumerate(col):
                 piece = self._get_piece_from_string(cell)
                 if piece is not None:
+                    self.piecesInBoard.add(piece.__class__)
                     piece.row = i
                     piece.column = j
-                self.piecesInBoard.add(piece.__class__)
                 if isinstance(piece, King):
                     setattr(self, cell, piece)
                 colVal += (piece, )
@@ -100,6 +100,7 @@ class Board:
                     (piece.row-1, piece.column+2),
                     (piece.row-1, piece.column-2),
                 ))
+            print(killzones)
             if isinstance(p, King):
                 killzones.update((
                     (piece.row-1, piece.column-1),
@@ -114,7 +115,7 @@ class Board:
                     (piece.row+1, piece.column),
                     (piece.row+1, piece.column+1),
                 ))
-
+        # print(killzones)
         return killzones
 
             # TODO do elimation of non pssible squares
