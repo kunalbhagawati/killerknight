@@ -107,7 +107,6 @@ class Board:
                     (piece.row-1, piece.column+1),
 
                     (piece.row, piece.column-1),
-                    (piece.row, piece.column),
                     (piece.row, piece.column+1),
 
                     (piece.row+1, piece.column-1),

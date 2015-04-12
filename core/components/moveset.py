@@ -3,15 +3,14 @@
 
 class Moveset:
 
-    def __init__(self, rowMax, rowMin, columnMax, columnMin, **kwargs):
+    def __init__(self, **kwargs):
         pass
 
 
 class FixedMoveset:
 
-    def __init__(self, rowDiff, colDiff, **kwargs):
-
-        super().__init__(rowDiff, rowDiff, colDiff, colDiff)
+    def __init__(self, callerInst, **kwargs):
+        self.callerInst = callerInst
 
     def _get_possible_moves(self):
-        
+        pass
