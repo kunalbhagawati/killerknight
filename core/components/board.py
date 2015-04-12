@@ -14,11 +14,20 @@ class Board:
         readRows = readData.split("\n")
 
         self.state = ()
-        for col in readRows:
+        for i, col in enumerate(readRows):
             col = col.split("|")
             col.pop(0)
             col.pop(len(col)-1)
-            colVal = [self._get_peice_from_string(i) for i in col]
+            colVal = ()
+            self.piecesInBoard = set()
+            for j, cell in enumerate(col):
+                piece = self._get_piece_from_string(cell)
+                piece.row = i
+                piece.column = j
+                self.piecesInBoard.add(piece.__class__)
+                if isinstance(piece, King):
+                    setattr(self, cell)
+                colVal += (piece, )
             self.state += (colVal, )
 
     def _get_string(self):
@@ -30,16 +39,16 @@ class Board:
             readData = f.read()
         return readData
 
-    def _get_peice_from_string(self, string):
+    def _get_piece_from_string(self, string):
         if string == '  ':
             return None
         else:
-            peiceTypes = {
+            pieceTypes = {
                 'k': King,
                 'n': Knight
             }
             team = string[1]
-            return peiceTypes[string[0]](team)
+            return pieceTypes[string[0]](team)
 
     def _get_state(self):
         return self.state
@@ -57,3 +66,44 @@ class Board:
                 string += "|"
             string += "\n"
         print(string)
+
+    def is_white_in_check(self):
+        return True if self._is_hunter_watching(self.kl) else return False
+
+    def _get_possible_moves(self, piece):
+        if isinstance(piece, Knight):
+            rows = 
+
+    def _is_hunter_watching(self, piece):
+        possibleKillZones = _get_killzones(piece)
+
+    def _get_killzones(self, piece):
+        killzones = set()
+        for p in self.piecesInBoard:
+            if isinstance(p, Knight):
+                killzones.update((
+                    (piece.row+2, piece.column+1),
+                    (piece.row+2, piece.column-1),
+                    (piece.row-2, piece.column+1),
+                    (piece.row-2, piece.column-1),
+                    (piece.row+1, piece.column+2),
+                    (piece.row+1, piece.column-2),
+                    (piece.row-1, piece.column+2),
+                    (piece.row-1, piece.column-2),
+                ))
+            if isinstance(k, King):
+                killzones.update((
+                    (piece.row-1, piece.column-1),
+                    (piece.row-1, piece.column),
+                    (piece.row-1, piece.column+1),
+
+                    (piece.row, piece.column-1),
+                    (piece.row, piece.column),
+                    (piece.row, piece.column+1),
+
+                    (piece.row+1, piece.column-1),
+                    (piece.row+1, piece.column),
+                    (piece.row+1, piece.column+1),
+                ))
+
+            for i in killzones
