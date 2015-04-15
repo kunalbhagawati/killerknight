@@ -90,38 +90,12 @@ class Board:
         return hunters or False
 
     def _get_killzones(self, piece):
-        killzones = ()
+        killzones = set()
         for p in self.piecesInBoard[get_opposing_team_char(piece)]:
-            if p is Knight:
-                killzones += (
-                    (piece.row+2, piece.column+1),
-                    (piece.row+2, piece.column-1),
-                    (piece.row-2, piece.column+1),
-                    (piece.row-2, piece.column-1),
-                    (piece.row+1, piece.column+2),
-                    (piece.row+1, piece.column-2),
-                    (piece.row-1, piece.column+2),
-                    (piece.row-1, piece.column-2),
-                )
-            if p is King:
-                killzones += (
-                    (piece.row-1, piece.column-1),
-                    (piece.row-1, piece.column),
-                    (piece.row-1, piece.column+1),
-
-                    (piece.row, piece.column-1),
-                    (piece.row, piece.column+1),
-
-                    (piece.row+1, piece.column-1),
-                    (piece.row+1, piece.column),
-                    (piece.row+1, piece.column+1),
-                )
+            killzones.update((piece.row+move[0], piece.column+move[1])
+                    for move in p.baseMoves
+                    if piece.row+move[0] > 0 and piece.column+move[1] > 0)
         return killzones
-
-            # TODO do elimation of non pssible squares
-            # for i in killzones:
-            #     for j in i:
-            #         if
 
 
 def get_opposing_team_char(piece):
