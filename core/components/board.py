@@ -14,7 +14,10 @@ class Board:
         readRows = readData.split("\n")
 
         self.state = ()
-        self.piecesInBoard = set()
+        self.piecesInBoard = {
+            'd': set(),
+            'l': set(),
+        }
         for i, col in enumerate(readRows):
             col = col.split("|")
             col.pop(0)
@@ -23,7 +26,7 @@ class Board:
             for j, cell in enumerate(col):
                 piece = self._get_piece_from_string(cell)
                 if piece is not None:
-                    self.piecesInBoard.add(piece.__class__)
+                    self.piecesInBoard[piece.team].add(piece.__class__)
                     piece.row = i
                     piece.column = j
                 if isinstance(piece, King):
@@ -73,7 +76,7 @@ class Board:
 
     # def _get_possible_moves(self, piece):
     #     if isinstance(piece, Knight):
-    #         rows = 
+    #         rows =
 
     def _is_hunter_watching(self, piece):
         possibleKillZones = self._get_killzones(piece)
@@ -88,7 +91,7 @@ class Board:
 
     def _get_killzones(self, piece):
         killzones = ()
-        for p in self.piecesInBoard:
+        for p in self.piecesInBoard[get_opposing_team_char(piece)]:
             if p is Knight:
                 killzones += (
                     (piece.row+2, piece.column+1),
@@ -118,4 +121,8 @@ class Board:
             # TODO do elimation of non pssible squares
             # for i in killzones:
             #     for j in i:
-            #         if 
+            #         if
+
+
+def get_opposing_team_char(piece):
+    return 'd' if piece.team == 'l' else 'l'
