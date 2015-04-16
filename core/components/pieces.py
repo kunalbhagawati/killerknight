@@ -20,8 +20,14 @@ class FixedMovePiece(Piece):
         self.moveset = FixedMoveset(self)
         super().__init__(team)
 
+    def abstract_moves(self):
+        """Gets the cells that can be traversed by this peice.
+        This includes the cells that are occupied by other peices."""
 
-class King(Piece):
+        return self.moveset.abstract_moves()
+
+
+class King(FixedMovePiece):
 
     baseMoves = (
             (-1, +0),
@@ -39,7 +45,7 @@ class King(Piece):
         return super().__str__('k')
 
 
-class Knight(Piece):
+class Knight(FixedMovePiece):
 
     baseMoves = (
             (+2, +1),
