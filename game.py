@@ -8,6 +8,7 @@ if __name__ == "__main__":
     b = Board()
     print()
     print("isWhiteInCheck: {0}\n".format(b.is_white_in_check()))
+    print("isWhiteInCheckMate: {0}\n".format(b.is_white_in_checkmate()))
     print("board string:")
     b.print_broard()
     print()
