@@ -18,7 +18,7 @@ class Board:
         readData = self._get_string()
         readRows = readData.split("\n")
 
-        self.state = []
+        self.state = ()
         self.pieceTypesInBoard = {
             'd': set(),
             'l': set(),
@@ -110,10 +110,6 @@ class Board:
         k = self._get_king_for_team(team)
         return True if self._hunters_watching(k) else False
 
-    # def _get_possible_moves(self, piece):
-    #     if isinstance(piece, Knight):
-    #         rows =
-
     def _hunters_watching(self, piece):
         hunters = ()
         for ememyClass in (self
@@ -163,10 +159,10 @@ class Board:
         kOldRow = k.row
         kOldColumn = k.column
         for m in self.allowed_moves(k):
-            self.move(k, m)
+            k.move(m)
             if not self._hunters_watching(k):
                 return False
-            self.move(k, (kOldRow, kOldColumn))
+            k.move((kOldRow, kOldColumn))
         else:
             return True
 
@@ -186,6 +182,8 @@ class Board:
         return self.is_checkmate_in_one_move('l')
 
     def is_checkmate_in_one_move(self, team):
+        """Checks if the team could be checkmated in one move"""
+
         # for each peice, make a move. Then check if the king is in checkmate
         if team in ('white', 'light', 'l'):
             team = 'l'
@@ -196,21 +194,28 @@ class Board:
             pieceOldRow = piece.row
             pieceOldColumn = piece.column
             for m in self.allowed_moves(piece):
+                oldPiece = self.state[m[0]][m[1]]
                 self.move(piece, m)
                 if self.is_checkmate(team):
                     return True
                 self.move(piece, (pieceOldRow, pieceOldColumn))
+                self._put_piece_in_square(oldPiece, (m[0], m[1]))
             else:
                 return False
 
     def move(self, piece, newLocTuple):
-        # self._set_state(piece, newLocTuple)
+        self._set_state(piece, newLocTuple)
         piece.move(newLocTuple)
 
     def _set_state(self, val, newLocTuple):
         tmpLst = [list(i) for i in self.state]
         tmpLst[val.row][val.column] = None
-        tmpLst[newLocTuple[0]][newLocTuple[0]] = val
+        tmpLst[newLocTuple[0]][newLocTuple[1]] = val
+        self.state = tuple(tmpLst)
+
+    def _put_piece_in_square(self, piece, locTuple):
+        tmpLst = [list(i) for i in self.state]
+        tmpLst[locTuple[0]][locTuple[1]] = piece
         self.state = tuple(tmpLst)
 
 
