@@ -99,42 +99,18 @@ class Board:
     #     if isinstance(piece, Knight):
     #         rows =
 
-    # TODO convert below two functions into one for better optimization
-
     def _hunters_watching(self, piece):
-        possibleKillZones = self._get_killzones(piece)
-
         hunters = ()
-        # TODO trivial solution. Make better
-        for kz in possibleKillZones:
-            square = self.state[kz[0]][kz[1]]
-            if square is not None and square.team != piece.team:
-                hunters += (square, )
-
+        for ememyClass in self.piecesInBoard[get_opposing_team_char(piece)]:
+            for move in ememyClass.baseMoves:
+                r = piece.row+move[0]
+                c = piece.column+move[1]
+                square = self.state[r][c]
+                if (square is not None
+                        and square.team != piece.team
+                        and square.__class__ is ememyClass):
+                    hunters += (square, )
         return hunters or False
-
-    def _get_killzones(self, piece):
-        killzones = set()
-        for p in self.piecesInBoard[get_opposing_team_char(piece)]:
-            killzones.update((piece.row+move[0], piece.column+move[1])
-                    for move in p.baseMoves
-                    if piece.row+move[0] > 0 and piece.column+move[1] > 0)
-        return killzones
-
-    # def _hunters_watching(self, piece):
-    #     hunters = ()
-    #     for ememyClass in self.piecesInBoard[get_opposing_team_char(piece)]:
-    #         for move in ememyClass.baseMoves:
-    #             print("##")
-    #             print(move)
-    #             print("##")
-    #             r = piece.row+move[0]
-    #             c = piece.column+move[1]
-    #             square = self.state[r][c]
-    #             if square is not None and square.team != piece.team:
-    #                 print(square, r, c)
-    #                 hunters += (square, )
-    #     return hunters or False
 
     def allowed_moves(self, peice):
         """Checks the given moves list and returns the possible moves for the
@@ -172,13 +148,10 @@ class Board:
         for move in self.allowed_moves(k):
             k.row = move[0]
             k.column = move[1]
-            
-            # print("king is at {0}".format((k.row, k.column)))
 
             if not self._hunters_watching(k):
                 return False
 
-            # print("Hunters: {0}".format([(i, (i.row, i.column)) for i in self._hunters_watching(k)]))
             k.row = kOldRow
             k.column = kOldColumn
         else:
@@ -193,6 +166,7 @@ class Board:
         except AttributeError:
             raise Exception("The king for team '{0}' does not exist. "
                     "The game is already lost!".format(team))
+
 
 def get_opposing_team_char(piece):
     return 'd' if piece.team == 'l' else 'l'
