@@ -24,3 +24,8 @@ class FixedMoveset:
             if newRow in range(0, 8) and newCol in range(0, 8):
                 moves.add((newRow, newCol))
         return moves
+
+    def move(self, newLocTuple):
+        self.callerInst.row = newLocTuple[0]
+        self.callerInst.column = newLocTuple[1]
+        return True

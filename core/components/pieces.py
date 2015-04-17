@@ -26,6 +26,9 @@ class FixedMovePiece(Piece):
 
         return self.moveset.abstract_moves()
 
+    def move(self, newLocTuple):
+        return self.moveset.move(newLocTuple)
+
 
 class King(FixedMovePiece):
 

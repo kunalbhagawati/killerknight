@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 
 from os import path as ospath
-from .pieces import Knight, King
+from .pieces import Knight, King, Piece
 
 
 class Board:
@@ -18,11 +18,16 @@ class Board:
         readData = self._get_string()
         readRows = readData.split("\n")
 
-        self.state = ()
-        self.piecesInBoard = {
+        self.state = []
+        self.pieceTypesInBoard = {
             'd': set(),
             'l': set(),
         }
+        self.piecesInBoard = {
+            'd': (),
+            'l': (),
+        }
+
         for i, col in enumerate(readRows):
             col = col.split("|")
             col.pop(0)
@@ -31,7 +36,8 @@ class Board:
             for j, cell in enumerate(col):
                 piece = self._get_piece_from_string(cell)
                 if piece is not None:
-                    self.piecesInBoard[piece.team].add(piece.__class__)
+                    self.pieceTypesInBoard[piece.team].add(piece.__class__)
+                    self.piecesInBoard[piece.team] += (piece, )
                     piece.row = i
                     piece.column = j
                 if isinstance(piece, King):
@@ -62,8 +68,17 @@ class Board:
     def _get_state(self):
         return self.state
 
-    def _get_peices_in_board(self):
-        return self.piecesInBoard
+    def _get_peiceTypes_in_board(self, team=None):
+        """Gets the classes of the peice types in the board"""
+
+        return (self.pieceTypesInBoard if team is None
+                else self.pieceTypesInBoard[team])
+
+    def _get_peices_in_board(self, team=None):
+        """Gets the instances of the peices in the board"""
+
+        return (self.piecesInBoard if team is None
+                else self.piecesInBoard[team])
 
     def print_broard(self):
         string = ''
@@ -101,7 +116,8 @@ class Board:
 
     def _hunters_watching(self, piece):
         hunters = ()
-        for ememyClass in self.piecesInBoard[get_opposing_team_char(piece)]:
+        for ememyClass in (self
+                ._get_peiceTypes_in_board(get_opposing_team_char(piece))):
             for move in ememyClass.baseMoves:
                 r = piece.row+move[0]
                 c = piece.column+move[1]
@@ -131,6 +147,7 @@ class Board:
         return self.is_checkmate('black')
 
     def is_checkmate(self, team):
+        """Check if the king for the passed team is in checkmate"""
 
         k = self._get_king_for_team(team)
         hunters = self._hunters_watching(k)
@@ -145,15 +162,11 @@ class Board:
         # So that failed. Attempt to make the king escape
         kOldRow = k.row
         kOldColumn = k.column
-        for move in self.allowed_moves(k):
-            k.row = move[0]
-            k.column = move[1]
-
+        for m in self.allowed_moves(k):
+            self.move(k, m)
             if not self._hunters_watching(k):
                 return False
-
-            k.row = kOldRow
-            k.column = kOldColumn
+            self.move(k, (kOldRow, kOldColumn))
         else:
             return True
 
@@ -167,6 +180,46 @@ class Board:
             raise Exception("The king for team '{0}' does not exist. "
                     "The game is already lost!".format(team))
 
+    def can_black_checkmate_in_one_move(self):
+        """Wrapper function for self.is_checkmate_in_one_move()"""
+
+        return self.is_checkmate_in_one_move('l')
+
+    def is_checkmate_in_one_move(self, team):
+        # for each peice, make a move. Then check if the king is in checkmate
+        if team in ('white', 'light', 'l'):
+            team = 'l'
+        elif team in ('black', 'dark', 'd'):
+            team = 'd'
+
+        for piece in self._get_peices_in_board(get_opposing_team_char(team)):
+            pieceOldRow = piece.row
+            pieceOldColumn = piece.column
+            for m in self.allowed_moves(piece):
+                self.move(piece, m)
+                if self.is_checkmate(team):
+                    return True
+                self.move(piece, (pieceOldRow, pieceOldColumn))
+            else:
+                return False
+
+    def move(self, piece, newLocTuple):
+        # self._set_state(piece, newLocTuple)
+        piece.move(newLocTuple)
+
+    def _set_state(self, val, newLocTuple):
+        tmpLst = [list(i) for i in self.state]
+        tmpLst[val.row][val.column] = None
+        tmpLst[newLocTuple[0]][newLocTuple[0]] = val
+        self.state = tuple(tmpLst)
+
 
 def get_opposing_team_char(piece):
-    return 'd' if piece.team == 'l' else 'l'
+    if isinstance(piece, Piece):
+        team = piece.team
+    elif isinstance(piece, str):
+        team = piece
+    else:
+        raise Exception("Unknown type of argument ({0}) passed: {1}"
+                .format(piece, piece.__class__))
+    return 'd' if team == 'l' else 'l'
