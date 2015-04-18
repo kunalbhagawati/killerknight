@@ -2,7 +2,7 @@
 
 from os import path as ospath
 from .pieces import Knight, King, Piece
-
+from core.config import Config
 
 class Board:
 
@@ -129,22 +129,26 @@ class Board:
             for move in ememyClass.baseMoves:
                 r = piece.row+move[0]
                 c = piece.column+move[1]
+                dbprint(r, c)
                 square = self.state[r][c]
                 if (square is not None
                         and square.team != piece.team
-                        and square.__class__ is ememyClass):
+                        and isinstance(square, ememyClass)):
+                    dbprint("Hunter {0} watching at {1}".format(str(square), (square.row, square.column)))
                     hunters += (square, )
         return hunters or False
 
-    def allowed_moves(self, peice):
+    def allowed_moves(self, peice, noKing=False):
         """Checks the given moves list and returns the possible moves for the
         piece."""
 
         allowedMoves = ()
         for move in peice.abstract_moves():
             attempt = self.state[move[0]][move[1]]
-            if (attempt is None or
-                    attempt.team != peice.team):
+            cond = attempt is None or attempt.team != peice.team
+            if noKing:
+                cond = cond and not isinstance(attempt, King)
+            if cond:
                 allowedMoves += (move, )
         return allowedMoves
 
@@ -159,20 +163,25 @@ class Board:
 
         k = self._get_king_for_team(team)
         hunters = self._hunters_watching(k)
+        # dbprint(["Hunter {0} at {1}".format(str(i), (i.row, i.column)) for i in hunters])
         if not hunters:
             return False
 
         # if there is only one hunter attempt to kill it.
         if len(hunters) == 1:
             if self._hunters_watching(hunters[0]):
+                # dbprint(["Hunters watching hunter {0} at {1}".format((str(i)), (i.row, i.column)) for i in self._hunters_watching(hunters[0])])
                 return False
 
         # So that failed. Attempt to make the king escape
+        dbprint("Attempt to escape")
         kOldRow = k.row
         kOldColumn = k.column
         for m in self.allowed_moves(k):
+            dbprint("King ({0}) moves to {1}".format(k.team, m))
             k.move(m)
             if not self._hunters_watching(k):
+                dbprint(["Hunter {0} at {1}".format(str(i), (i.row, i.column)) for i in hunters])
                 return False
             k.move((kOldRow, kOldColumn))
         else:
@@ -205,15 +214,16 @@ class Board:
         for piece in self._get_peices_in_board(get_opposing_team_char(team)):
             pieceOldRow = piece.row
             pieceOldColumn = piece.column
-            for m in self.allowed_moves(piece):
+            for m in self.allowed_moves(piece, noKing=True):
                 oldPiece = self.state[m[0]][m[1]]
+                # dbprint("Piece {0} at {1} moves to {2}".format(str(piece), (piece.row, piece.column),m))
                 self.move(piece, m)
                 if self.is_checkmate(team):
-                    return True
+                    return (piece, m)
                 self.move(piece, (pieceOldRow, pieceOldColumn))
                 self._put_piece_in_square(oldPiece, (m[0], m[1]))
-            else:
-                return False
+        else:
+            return False
 
     def move(self, piece, newLocTuple):
         self._set_state(piece, newLocTuple)
@@ -240,3 +250,8 @@ def get_opposing_team_char(piece):
         raise Exception("Unknown type of argument ({0}) passed: {1}"
                 .format(piece, piece.__class__))
     return 'd' if team == 'l' else 'l'
+
+
+def dbprint(*args):
+    if getattr(Config, 'debug', False) is True:
+        print(args)
