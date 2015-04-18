@@ -10,10 +10,13 @@ class Board:
         self._construct_board()
 
     def _construct_board(self):
+        """Construct the board from the input."""
+
         # TODO save common vals like board size, etc in a common config using:
         # - modules: Simplest way, but requires file creation
         # - create a new class or use one / singleton pattern: Complex
-        # - Save to this Class (not instance): Race conditions, Stale on each move?
+        # - Save to this Class (not instance): Race conditions, Stale on
+        # each move?
 
         readData = self._get_string()
         readRows = readData.split("\n")
@@ -46,6 +49,8 @@ class Board:
             self.state += (colVal, )
 
     def _get_string(self):
+        """Gets the string representing the board from the input."""
+
         root = (ospath.dirname(
             ospath.dirname(
                 ospath.dirname(
@@ -55,6 +60,8 @@ class Board:
         return readData
 
     def _get_piece_from_string(self, string):
+        """Get the piece instance from the string passed."""
+
         if string == '  ':
             return None
         else:
@@ -66,21 +73,25 @@ class Board:
             return pieceTypes[string[0]](team)
 
     def _get_state(self):
+        """Gets the state variable."""
+
         return self.state
 
     def _get_peiceTypes_in_board(self, team=None):
-        """Gets the classes of the peice types in the board"""
+        """Gets the classes of the peice types in the board."""
 
         return (self.pieceTypesInBoard if team is None
                 else self.pieceTypesInBoard[team])
 
     def _get_peices_in_board(self, team=None):
-        """Gets the instances of the peices in the board"""
+        """Gets the instances of the peices in the board."""
 
         return (self.piecesInBoard if team is None
                 else self.piecesInBoard[team])
 
     def print_broard(self):
+        """Prints the state of the board"""
+
         string = ''
         for row in self.state:
             string += "|"
@@ -97,20 +108,21 @@ class Board:
     def is_white_in_check(self):
         """Thin wrapper for is_checked"""
 
-        return self.is_checked('white')
+        return True if self.is_checked('white') else False
 
     def is_black_in_check(self):
         """Thin wrapper for is_checked"""
 
-        return self.is_checked('black')
+        return True if self.is_checked('black') else False
 
     def is_checked(self, team):
         """Checks if the king for the given team is checked"""
 
-        k = self._get_king_for_team(team)
-        return True if self._hunters_watching(k) else False
+        return self._hunters_watching(self._get_king_for_team(team))
 
     def _hunters_watching(self, piece):
+        """Checks the enemy pieces looking at the given piece."""
+
         hunters = ()
         for ememyClass in (self
                 ._get_peiceTypes_in_board(get_opposing_team_char(piece))):
@@ -126,7 +138,7 @@ class Board:
 
     def allowed_moves(self, peice):
         """Checks the given moves list and returns the possible moves for the
-        piece"""
+        piece."""
 
         allowedMoves = ()
         for move in peice.abstract_moves():
